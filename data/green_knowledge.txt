@@ -54,3 +54,20 @@ RAG means Retrieval-Augmented Generation. In RAG, the system first retrieves use
 GreenPath AI is a RAG-based sustainability project mentor. It helps students discover SDG-aligned project ideas, understand sustainability topics, generate skill roadmaps, and create impact reports.
 
 A 15-day roadmap for building GreenPath AI includes planning the idea, creating the Streamlit app, building the project idea generator, building the SDG matcher, building the roadmap generator, adding RAG, testing questions, improving UI, preparing GitHub README, and creating the final presentation.
+Students can reduce their carbon footprint by using public transport, cycling, walking, carpooling, saving electricity, switching off lights and fans when not in use, reducing plastic usage, carrying reusable bottles and bags, eating more local and plant-based food, avoiding food waste, using digital notes instead of unnecessary printing, recycling waste, and participating in tree plantation and sustainability activities.
+
+Carbon footprint means the total amount of greenhouse gases produced by our daily activities such as transport, electricity use, food choices, shopping, and waste generation.
+
+For students, the best ways to reduce carbon footprint are:
+1. Use public transport, cycling, or walking.
+2. Save electricity in classrooms and hostels.
+3. Avoid single-use plastic.
+4. Carry reusable water bottles.
+5. Use notebooks and paper carefully.
+6. Reduce food waste.
+7. Recycle paper, plastic, and e-waste.
+8. Support campus sustainability projects.
+9. Use digital resources when possible.
+10. Spread awareness about climate action.
+
+This topic is related to SDG 13 Climate Action, SDG 12 Responsible Consumption and Production, and SDG 7 Affordable and Clean Energy.
