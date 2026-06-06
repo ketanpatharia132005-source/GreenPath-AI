@@ -1,0 +1,56 @@
+GreenPath AI Knowledge Base
+
+Sustainable Development Goals, also called SDGs, are 17 global goals created by the United Nations to solve major global problems such as poverty, hunger, quality education, clean water, climate change, inequality, and responsible consumption.
+
+SDG 4 is Quality Education. It focuses on inclusive and equitable education and lifelong learning opportunities. A project related to SDG 4 can help students learn skills, get career guidance, or access educational resources.
+
+SDG 7 is Affordable and Clean Energy. It focuses on access to affordable, reliable, sustainable, and modern energy. A project related to SDG 7 can help people save electricity, understand solar energy, or track energy use.
+
+SDG 8 is Decent Work and Economic Growth. It focuses on productive employment, entrepreneurship, innovation, and decent work for all. A project related to SDG 8 can help students identify skills, prepare for jobs, or understand green careers.
+
+SDG 9 is Industry, Innovation and Infrastructure. It focuses on building resilient infrastructure, promoting inclusive industrialization, and supporting innovation. A project related to SDG 9 can use technology to solve sustainability problems.
+
+SDG 12 is Responsible Consumption and Production. It focuses on reducing waste, recycling, sustainable production, and responsible use of resources. A project related to SDG 12 can help people understand waste sorting, e-waste disposal, and sustainable habits.
+
+SDG 13 is Climate Action. It focuses on taking urgent action to combat climate change and its impacts. A project related to SDG 13 can spread climate awareness, explain carbon footprint, or suggest eco-friendly actions.
+
+Green skills are the knowledge, abilities, values, and attitudes needed to live in and support a sustainable society. Examples of green skills include climate awareness, waste reduction, energy saving, sustainable design, green entrepreneurship, environmental data analysis, and AI for sustainability.
+
+AI can help sustainability by analyzing environmental data, predicting climate risks, optimizing energy usage, reducing waste, supporting smart agriculture, and creating awareness tools.
+
+RAG means Retrieval-Augmented Generation. In RAG, the system first retrieves useful information from documents and then uses that information to generate a better answer. RAG is more reliable than a normal chatbot because it can answer using a specific knowledge base.
+
+GreenPath AI is a RAG-based sustainability project mentor. It helps students discover SDG-aligned project ideas, understand sustainability topics, generate skill roadmaps, and create impact reports.
+
+A beginner-friendly sustainability project is ClimateWise RAG Assistant. It answers climate-related questions using documents and helps users understand SDG 13.
+
+Another project is Green Career Path AI. It recommends green career skills, job roles, and project ideas for students. It supports SDG 4 and SDG 8.
+
+Another project is EcoSort AI Guide. It helps users understand waste categories, recycling, and e-waste disposal. It supports SDG 12 and SDG 13.
+
+Another project is Smart Energy Awareness AI. It gives simple electricity-saving suggestions and explains clean energy. It supports SDG 7.
+
+A 15-day roadmap for building GreenPath AI includes planning the idea, creating the Streamlit app, building project idea generator, building SDG matcher, building roadmap generator, adding RAG, testing questions, improving UI, preparing GitHub README, and creating final presentation.
+GreenPath AI Knowledge Base
+
+SDG means Sustainable Development Goal. SDGs are 17 global goals created to solve major world problems such as poverty, education, inequality, climate change, and responsible consumption.
+
+SDG 4 is Quality Education. It focuses on inclusive and equitable education and lifelong learning opportunities. A project related to SDG 4 can help students learn skills, get career guidance, or access educational resources.
+
+SDG 7 is Affordable and Clean Energy. It focuses on access to affordable, reliable, sustainable, and modern energy. A project related to SDG 7 can help people save electricity, understand solar energy, or track energy use.
+
+SDG 8 is Decent Work and Economic Growth. It focuses on productive employment, entrepreneurship, innovation, and decent work for all. A project related to SDG 8 can help students identify skills, prepare for jobs, or understand green careers.
+
+SDG 12 is Responsible Consumption and Production. It focuses on reducing waste, recycling, sustainable production, and responsible use of resources. A project related to SDG 12 can help people understand waste sorting, e-waste disposal, and sustainable habits.
+
+SDG 13 is Climate Action. It focuses on taking urgent action to combat climate change and its impacts. A project related to SDG 13 can spread climate awareness, explain carbon footprint, or suggest eco-friendly actions.
+
+Green skills are the knowledge, abilities, values, and attitudes needed to support a sustainable society. Examples of green skills include climate awareness, waste reduction, energy saving, sustainable design, green entrepreneurship, environmental data analysis, and AI for sustainability.
+
+AI can help sustainability by analyzing environmental data, predicting climate risks, optimizing energy usage, reducing waste, supporting smart agriculture, and creating awareness tools.
+
+RAG means Retrieval-Augmented Generation. In RAG, the system first retrieves useful information from documents and then uses that information to generate a better answer. RAG is more reliable than a normal chatbot because it can answer using a specific knowledge base.
+
+GreenPath AI is a RAG-based sustainability project mentor. It helps students discover SDG-aligned project ideas, understand sustainability topics, generate skill roadmaps, and create impact reports.
+
+A 15-day roadmap for building GreenPath AI includes planning the idea, creating the Streamlit app, building the project idea generator, building the SDG matcher, building the roadmap generator, adding RAG, testing questions, improving UI, preparing GitHub README, and creating the final presentation.
