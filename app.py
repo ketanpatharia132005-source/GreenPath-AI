@@ -94,10 +94,13 @@ elif menu == "Ask GreenPath AI":
     user_question = st.text_input("Ask any sustainability or SDG-related question:")
 
     if st.button("Get Answer"):
-        if user_question:
-            answer = rag_answer(user_question)
-            st.markdown(answer)
-        else:
+        if user_question.strip():
+             with st.spinner("Generating answer..."):
+                answer = rag_answer(user_question)
+
+        st.subheader("Answer")
+        st.markdown(answer)        
+    else:
             st.warning("Please enter a question.")
 
 elif menu == "Project Idea Generator":

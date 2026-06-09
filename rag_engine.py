@@ -1,4 +1,12 @@
 import os
+from dotenv import load_dotenv
+from groq import Groq
+
+load_dotenv()
+
+client = Groq(
+    api_key=os.getenv("GROQ_API_KEY")
+)
 
 
 def load_knowledge_base():
@@ -15,7 +23,6 @@ def load_knowledge_base():
 
 def split_into_chunks(text):
     paragraphs = text.split("\n\n")
-
     chunks = []
 
     for para in paragraphs:
@@ -39,6 +46,20 @@ def calculate_score(question, chunk):
     return score
 
 
+def retrieve_context(question, chunks, top_k=3):
+    scored_chunks = []
+
+    for chunk in chunks:
+        score = calculate_score(question, chunk)
+        scored_chunks.append((score, chunk))
+
+    scored_chunks.sort(reverse=True, key=lambda x: x[0])
+
+    best_chunks = [chunk for score, chunk in scored_chunks[:top_k] if score > 0]
+
+    return "\n\n".join(best_chunks)
+
+
 def rag_answer(question):
     knowledge_text = load_knowledge_base()
 
@@ -53,46 +74,52 @@ def rag_answer(question):
     if len(chunks) == 0:
         return "No readable content found in the knowledge file."
 
-    scored_chunks = []
+    context = retrieve_context(question, chunks)
 
-    for chunk in chunks:
-        score = calculate_score(question, chunk)
-        scored_chunks.append((score, chunk))
+    if context.strip() == "":
+        return "Sorry, I could not find relevant information in the knowledge base."
 
-    scored_chunks.sort(reverse=True, key=lambda x: x[0])
+    prompt = f"""
+You are GreenPath AI, a sustainability and SDG assistant.
 
-    best_chunks = [chunk for score, chunk in scored_chunks[:2] if score > 0]
+Use the given knowledge base context to answer the user's question.
 
-    if not best_chunks:
-        return """
-## Answer from GreenPath AI
+Rules:
+- Answer only what the user asked.
+- Do not explain the RAG process.
+- Do not write unnecessary project details.
+- Do not mention "knowledge base" in the final answer.
+- Keep the answer simple, clear, and student-friendly.
+- If the user asks "What is SDG 13?", explain SDG 13 and related climate action information only.
 
-Sorry, I could not find a strong match in the knowledge base.
-
-Try asking questions like:
-- What is SDG 13?
-- What is RAG?
-- What are green skills?
-- Suggest a 15-day sustainability project.
-"""
-
-    context = "\n\n".join(best_chunks)
-
-    answer = f"""
-## Answer from GreenPath AI Knowledge Base
-
+Context:
 {context}
 
----
+User Question:
+{question}
 
-### Simple Explanation
-
-This answer was generated using a basic RAG process:
-
-1. Your question was received.
-2. The system searched the knowledge base.
-3. The most relevant information was retrieved.
-4. The answer was shown based on that retrieved content.
+Answer:
 """
 
-    return answer
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful sustainability and SDG assistant."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            temperature=0.3,
+            max_tokens=500
+        )
+
+        answer = response.choices[0].message.content
+        return answer
+
+    except Exception as e:
+        return f"Error while generating answer: {e}"
