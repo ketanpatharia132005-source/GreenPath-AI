@@ -4,10 +4,26 @@ from groq import Groq
 
 load_dotenv()
 
-client = Groq(
-    api_key=os.getenv("GROQ_API_KEY")
-)
 
+def get_groq_api_key():
+    api_key = os.getenv("GROQ_API_KEY")
+
+    if api_key:
+        return api_key
+
+    try:
+        import streamlit as st
+        return st.secrets["GROQ_API_KEY"]
+    except Exception:
+        return None
+
+
+api_key = get_groq_api_key()
+
+if not api_key:
+    raise ValueError("GROQ_API_KEY not found. Add it in .env locally or Streamlit Secrets online.")
+
+client = Groq(api_key=api_key)
 
 def load_knowledge_base():
     file_path = "data/green_knowledge.txt"
