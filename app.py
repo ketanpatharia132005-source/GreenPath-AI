@@ -1,9 +1,47 @@
+from pypdf import PdfReader
+from docx import Document
+from PIL import Image
 import streamlit as st
+
 from project_generator import generate_project_idea
 from sdg_matcher import match_sdg
 from roadmap_generator import generate_roadmap
 from rag_engine import rag_answer
 from impact_report import generate_impact_report
+
+
+# -----------------------------
+# File extraction functions
+# -----------------------------
+def extract_text_from_pdf(uploaded_file):
+    reader = PdfReader(uploaded_file)
+    text = ""
+
+    for page in reader.pages:
+        page_text = page.extract_text()
+        if page_text:
+            text += page_text + "\n"
+
+    return text
+
+
+def extract_text_from_txt(uploaded_file):
+    return uploaded_file.read().decode("utf-8")
+
+
+def extract_text_from_docx(uploaded_file):
+    doc = Document(uploaded_file)
+    text = ""
+
+    for paragraph in doc.paragraphs:
+        text += paragraph.text + "\n"
+
+    return text
+
+
+# -----------------------------
+# Page setup
+# -----------------------------
 st.set_page_config(
     page_title="GreenPath AI",
     page_icon="🌱",
@@ -29,6 +67,7 @@ menu = st.sidebar.selectbox(
         "Impact Report Generator"
     ]
 )
+
 st.sidebar.markdown("---")
 st.sidebar.info("""
 🌱 **GreenPath AI**
@@ -42,6 +81,10 @@ Built for:
 - Impact reporting
 """)
 
+
+# -----------------------------
+# Home page
+# -----------------------------
 if menu == "Home":
     st.header("Welcome to GreenPath AI 🌱")
 
@@ -87,34 +130,141 @@ if menu == "Home":
     as a personal AI mentor for sustainability-based project building.
     """)
 
+
+# -----------------------------
+# Ask GreenPath AI page
+# -----------------------------
 elif menu == "Ask GreenPath AI":
     st.header("Ask GreenPath AI")
     st.write("Ask questions about SDGs, green skills, sustainability, RAG, or project ideas.")
+
+    st.markdown("---")
+    st.subheader("Upload Document or Image")
+
+    uploaded_file = st.file_uploader(
+        "Upload PDF, TXT, DOCX, PNG, JPG, or JPEG file",
+        type=["pdf", "txt", "docx", "png", "jpg", "jpeg"]
+    )
+
+    if uploaded_file is not None:
+        file_type = uploaded_file.type
+
+        try:
+            if file_type == "application/pdf":
+                extracted_text = extract_text_from_pdf(uploaded_file)
+
+                st.session_state["uploaded_context"] = extracted_text
+                st.session_state["uploaded_image_note"] = ""
+
+                st.success("PDF content extracted successfully.")
+
+                with st.expander("Preview extracted text"):
+                    st.write(extracted_text[:1500])
+
+            elif file_type == "text/plain":
+                extracted_text = extract_text_from_txt(uploaded_file)
+
+                st.session_state["uploaded_context"] = extracted_text
+                st.session_state["uploaded_image_note"] = ""
+
+                st.success("Text file content extracted successfully.")
+
+                with st.expander("Preview extracted text"):
+                    st.write(extracted_text[:1500])
+
+            elif file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                extracted_text = extract_text_from_docx(uploaded_file)
+
+                st.session_state["uploaded_context"] = extracted_text
+                st.session_state["uploaded_image_note"] = ""
+
+                st.success("DOCX content extracted successfully.")
+
+                with st.expander("Preview extracted text"):
+                    st.write(extracted_text[:1500])
+
+            elif file_type in ["image/png", "image/jpeg", "image/jpg"]:
+                image = Image.open(uploaded_file)
+
+                st.image(
+                    image,
+                    caption="Uploaded Environmental Image",
+                    use_container_width=True
+                )
+
+                st.session_state["uploaded_context"] = ""
+                st.session_state["uploaded_image_note"] = """
+                The user has uploaded an environmental image.
+                Answer the user's question from the perspective of climate awareness,
+                pollution, sustainability, SDG 13, and possible environmental action.
+
+                Important:
+                If exact image content is not available to the model,
+                explain that the answer is based on the user's question and environmental context.
+                """
+
+                st.success("Image uploaded successfully.")
+
+        except Exception as e:
+            st.error(f"File processing error: {e}")
+
+    st.markdown("---")
 
     user_question = st.text_input("Ask any sustainability or SDG-related question:")
 
     if st.button("Get Answer"):
         if user_question.strip():
-             with st.spinner("Generating answer..."):
-                answer = rag_answer(user_question)
+            document_context = st.session_state.get("uploaded_context", "")
+            image_note = st.session_state.get("uploaded_image_note", "")
+
+        with st.spinner("Generating answer..."):
+                    answer = rag_answer(
+        user_question,
+        uploaded_context=document_context,
+        image_note=image_note
+    )
 
         st.subheader("Answer")
-        st.markdown(answer)        
+        st.markdown(answer)
+
     else:
             st.warning("Please enter a question.")
 
+
+# -----------------------------
+# Project Idea Generator page
+# -----------------------------
 elif menu == "Project Idea Generator":
     st.header("Project Idea Generator")
 
-    domain = st.selectbox("Select your domain", ["AI", "Web Development", "Data Science", "IoT"])
-    level = st.selectbox("Select your level", ["Beginner", "Intermediate"])
-    duration = st.selectbox("Project duration", ["7 Days", "15 Days", "30 Days"])
-    sdg = st.selectbox("Select SDG area", ["Education", "Climate Action", "Employability", "Waste Management", "Energy"])
+    domain = st.selectbox(
+        "Select your domain",
+        ["AI", "Web Development", "Data Science", "IoT"]
+    )
+
+    level = st.selectbox(
+        "Select your level",
+        ["Beginner", "Intermediate"]
+    )
+
+    duration = st.selectbox(
+        "Project duration",
+        ["7 Days", "15 Days", "30 Days"]
+    )
+
+    sdg = st.selectbox(
+        "Select SDG area",
+        ["Education", "Climate Action", "Employability", "Waste Management", "Energy"]
+    )
 
     if st.button("Generate Project Idea"):
         idea = generate_project_idea(domain, level, duration, sdg)
         st.markdown(idea)
 
+
+# -----------------------------
+# SDG Matcher page
+# -----------------------------
 elif menu == "SDG Matcher":
     st.header("SDG Matcher")
 
@@ -126,6 +276,11 @@ elif menu == "SDG Matcher":
             st.markdown(result)
         else:
             st.warning("Please enter a problem.")
+
+
+# -----------------------------
+# Skill Roadmap Generator page
+# -----------------------------
 elif menu == "Skill Roadmap Generator":
     st.header("Skill Roadmap Generator")
 
@@ -139,6 +294,10 @@ elif menu == "Skill Roadmap Generator":
         else:
             st.warning("Please enter both current skill and goal.")
 
+
+# -----------------------------
+# Impact Report Generator page
+# -----------------------------
 elif menu == "Impact Report Generator":
     st.header("Impact Report Generator")
 
@@ -149,7 +308,14 @@ elif menu == "Impact Report Generator":
 
     if st.button("Generate Impact Report"):
         if project_name and problem and target_users and sdgs:
-            report = generate_impact_report(project_name, problem, target_users, sdgs)
+            report = generate_impact_report(
+                project_name,
+                problem,
+                target_users,
+                sdgs
+            )
+
             st.markdown(report)
+
         else:
-            st.warning("Please fill all fields.")            
+            st.warning("Please fill all fields.")

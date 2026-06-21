@@ -25,6 +25,7 @@ if not api_key:
 
 client = Groq(api_key=api_key)
 
+
 def load_knowledge_base():
     file_path = "data/green_knowledge.txt"
 
@@ -37,14 +38,38 @@ def load_knowledge_base():
     return text
 
 
-def split_into_chunks(text):
-    paragraphs = text.split("\n\n")
-    chunks = []
+def split_into_chunks(text, chunk_size=900, overlap=150):
+    """
+    This function splits long text into smaller chunks.
+    It works for both:
+    1. green_knowledge.txt
+    2. uploaded documents
+    """
 
-    for para in paragraphs:
-        clean_para = para.strip()
-        if clean_para:
-            chunks.append(clean_para)
+    if not text:
+        return []
+
+    text = text.replace("\r", " ")
+    text = text.replace("\n", " ")
+    text = " ".join(text.split())
+
+    chunks = []
+    start = 0
+
+    while start < len(text):
+        end = start + chunk_size
+        chunk = text[start:end]
+
+        if chunk.strip():
+            chunks.append(chunk.strip())
+
+        start = end - overlap
+
+        if start < 0:
+            start = 0
+
+        if start >= len(text):
+            break
 
     return chunks
 
@@ -56,13 +81,15 @@ def calculate_score(question, chunk):
     score = 0
 
     for word in question_words:
-        if word in chunk_lower:
+        clean_word = word.strip(".,?!:;()[]{}'\"")
+
+        if len(clean_word) > 2 and clean_word in chunk_lower:
             score += 1
 
     return score
 
 
-def retrieve_context(question, chunks, top_k=3):
+def retrieve_context(question, chunks, top_k=4):
     scored_chunks = []
 
     for chunk in chunks:
@@ -76,29 +103,11 @@ def retrieve_context(question, chunks, top_k=3):
     return "\n\n".join(best_chunks)
 
 
-def rag_answer(question):
-    knowledge_text = load_knowledge_base()
-
-    if knowledge_text is None:
-        return "Knowledge file not found. Please add green_knowledge.txt inside the data folder."
-
-    if knowledge_text.strip() == "":
-        return "Knowledge file is empty. Please add content inside green_knowledge.txt."
-
-    chunks = split_into_chunks(knowledge_text)
-
-    if len(chunks) == 0:
-        return "No readable content found in the knowledge file."
-
-    context = retrieve_context(question, chunks)
-
-    if context.strip() == "":
-        return "Sorry, I could not find relevant information in the knowledge base."
-
+def generate_answer_from_context(question, context, image_note=""):
     prompt = f"""
 You are GreenPath AI, a sustainability and SDG assistant.
 
-Use the given knowledge base context to answer the user's question.
+Use the given context to answer the user's question.
 
 Rules:
 - Answer only what the user asked.
@@ -106,10 +115,16 @@ Rules:
 - Do not write unnecessary project details.
 - Do not mention "knowledge base" in the final answer.
 - Keep the answer simple, clear, and student-friendly.
-- If the user asks "What is SDG 13?", explain SDG 13 and related climate action information only.
+- Focus on sustainability, SDGs, climate awareness, green skills, and practical suggestions.
+- If uploaded document context is available, use it to answer the user's question.
+- If image input is mentioned, give an awareness-based environmental explanation.
+- If the exact image content is not available, say that the answer is based on the user's question and environmental context.
 
 Context:
 {context}
+
+Image Instruction:
+{image_note}
 
 User Question:
 {question}
@@ -131,7 +146,7 @@ Answer:
                 }
             ],
             temperature=0.3,
-            max_tokens=500
+            max_tokens=600
         )
 
         answer = response.choices[0].message.content
@@ -139,3 +154,48 @@ Answer:
 
     except Exception as e:
         return f"Error while generating answer: {e}"
+
+
+def rag_answer(question, uploaded_context="", image_note=""):
+    """
+    Main RAG answer function.
+
+    It uses:
+    1. Permanent knowledge file: data/green_knowledge.txt
+    2. Temporary uploaded document context from app.py
+    3. Image note if user uploads an image
+    """
+
+    knowledge_text = load_knowledge_base()
+
+    all_chunks = []
+
+    # Permanent knowledge file chunks
+    if knowledge_text and knowledge_text.strip():
+        knowledge_chunks = split_into_chunks(knowledge_text)
+        all_chunks.extend(knowledge_chunks)
+
+    # Uploaded document chunks
+    if uploaded_context and uploaded_context.strip():
+        uploaded_chunks = split_into_chunks(uploaded_context)
+        all_chunks.extend(uploaded_chunks)
+
+    # If no knowledge file and no uploaded document
+    if len(all_chunks) == 0:
+        if image_note.strip():
+            context = "The user uploaded an environmental image. Give a sustainability and SDG-based explanation."
+            return generate_answer_from_context(question, context, image_note)
+
+        return "No readable content found. Please add green_knowledge.txt inside the data folder or upload a document."
+
+    context = retrieve_context(question, all_chunks)
+
+    # If no matching chunk found, still allow image-based answer
+    if context.strip() == "":
+        if image_note.strip():
+            context = "The user uploaded an environmental image. Give a sustainability and SDG-based explanation."
+            return generate_answer_from_context(question, context, image_note)
+
+        return "Sorry, I could not find relevant information. Please ask a more specific question or upload a related document."
+
+    return generate_answer_from_context(question, context, image_note)
