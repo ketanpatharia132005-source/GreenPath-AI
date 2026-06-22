@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from groq import Groq
+import base64
 
 load_dotenv()
 
@@ -199,3 +200,46 @@ def rag_answer(question, uploaded_context="", image_note=""):
         return "Sorry, I could not find relevant information. Please ask a more specific question or upload a related document."
 
     return generate_answer_from_context(question, context, image_note)
+def analyze_image_with_groq(uploaded_image, user_question):
+    image_bytes = uploaded_image.getvalue()
+    base64_image = base64.b64encode(image_bytes).decode("utf-8")
+
+    file_type = uploaded_image.type
+
+    if file_type not in ["image/jpeg", "image/png", "image/jpg"]:
+        return "Please upload a valid JPG, JPEG, or PNG image."
+
+    response = client.chat.completions.create(
+        model="meta-llama/llama-4-scout-17b-16e-instruct",
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are GreenPath-AI, an environmental awareness assistant. "
+                    "Analyze the uploaded image carefully. Explain what is visible in the image, "
+                    "identify environmental problems if present, and connect it with sustainability "
+                    "and SDG 13 Climate Action. "
+                    "Do not say that the exact image content is not available if an image is provided."
+                ),
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": user_question,
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:{file_type};base64,{base64_image}"
+                        },
+                    },
+                ],
+            },
+        ],
+        temperature=0.3,
+        max_completion_tokens=700,
+    )
+
+    return response.choices[0].message.content

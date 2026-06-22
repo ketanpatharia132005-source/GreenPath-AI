@@ -6,7 +6,7 @@ import streamlit as st
 from project_generator import generate_project_idea
 from sdg_matcher import match_sdg
 from roadmap_generator import generate_roadmap
-from rag_engine import rag_answer
+from rag_engine import rag_answer, analyze_image_with_groq
 from impact_report import generate_impact_report
 
 
@@ -131,6 +131,7 @@ if menu == "Home":
     """)
 
 
+
 # -----------------------------
 # Ask GreenPath AI page
 # -----------------------------
@@ -154,7 +155,7 @@ elif menu == "Ask GreenPath AI":
                 extracted_text = extract_text_from_pdf(uploaded_file)
 
                 st.session_state["uploaded_context"] = extracted_text
-                st.session_state["uploaded_image_note"] = ""
+                st.session_state["uploaded_image"] = None
 
                 st.success("PDF content extracted successfully.")
 
@@ -165,7 +166,7 @@ elif menu == "Ask GreenPath AI":
                 extracted_text = extract_text_from_txt(uploaded_file)
 
                 st.session_state["uploaded_context"] = extracted_text
-                st.session_state["uploaded_image_note"] = ""
+                st.session_state["uploaded_image"] = None
 
                 st.success("Text file content extracted successfully.")
 
@@ -176,7 +177,7 @@ elif menu == "Ask GreenPath AI":
                 extracted_text = extract_text_from_docx(uploaded_file)
 
                 st.session_state["uploaded_context"] = extracted_text
-                st.session_state["uploaded_image_note"] = ""
+                st.session_state["uploaded_image"] = None
 
                 st.success("DOCX content extracted successfully.")
 
@@ -193,15 +194,7 @@ elif menu == "Ask GreenPath AI":
                 )
 
                 st.session_state["uploaded_context"] = ""
-                st.session_state["uploaded_image_note"] = """
-                The user has uploaded an environmental image.
-                Answer the user's question from the perspective of climate awareness,
-                pollution, sustainability, SDG 13, and possible environmental action.
-
-                Important:
-                If exact image content is not available to the model,
-                explain that the answer is based on the user's question and environmental context.
-                """
+                st.session_state["uploaded_image"] = uploaded_file
 
                 st.success("Image uploaded successfully.")
 
@@ -213,22 +206,26 @@ elif menu == "Ask GreenPath AI":
     user_question = st.text_input("Ask any sustainability or SDG-related question:")
 
     if st.button("Get Answer"):
-        if user_question.strip():
-            document_context = st.session_state.get("uploaded_context", "")
-            image_note = st.session_state.get("uploaded_image_note", "")
-
-        with st.spinner("Generating answer..."):
-                    answer = rag_answer(
-        user_question,
-        uploaded_context=document_context,
-        image_note=image_note
-    )
-
-        st.subheader("Answer")
-        st.markdown(answer)
-
-    else:
+        if user_question.strip() == "":
             st.warning("Please enter a question.")
+        else:
+            document_context = st.session_state.get("uploaded_context", "")
+            uploaded_image = st.session_state.get("uploaded_image", None)
+
+            with st.spinner("Generating answer..."):
+                if uploaded_image is not None:
+                    answer = analyze_image_with_groq(
+                        uploaded_image,
+                        user_question
+                    )
+                else:
+                    answer = rag_answer(
+                        user_question,
+                        uploaded_context=document_context
+                    )
+
+            st.subheader("Answer")
+            st.markdown(answer)
 
 
 # -----------------------------
