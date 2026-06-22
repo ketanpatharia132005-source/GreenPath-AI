@@ -202,31 +202,32 @@ elif menu == "Ask GreenPath AI":
             st.error(f"File processing error: {e}")
 
     st.markdown("---")
-
+with st.form("question_form"):
     user_question = st.text_input("Ask any sustainability or SDG-related question:")
+    submitted = st.form_submit_button("Get Answer")
 
-    if st.button("Get Answer"):
-        if user_question.strip() == "":
-            st.warning("Please enter a question.")
-        else:
-            document_context = st.session_state.get("uploaded_context", "")
-            uploaded_image = st.session_state.get("uploaded_image", None)
+if submitted:
+    if user_question.strip() == "":
+        st.warning("Please enter a question.")
+    else:
+        document_context = st.session_state.get("uploaded_context", "")
+        uploaded_image = st.session_state.get("uploaded_image", None)
 
-            with st.spinner("Generating answer..."):
-                if uploaded_image is not None:
-                    answer = analyze_image_with_groq(
-                        uploaded_image,
-                        user_question
-                    )
-                else:
-                    answer = rag_answer(
-                        user_question,
-                        uploaded_context=document_context
-                    )
+        with st.spinner("Generating answer..."):
+            if uploaded_image is not None:
+                answer = analyze_image_with_groq(
+                    uploaded_image,
+                    user_question
+                )
+            else:
+                answer = rag_answer(
+                    user_question,
+                    uploaded_context=document_context
+                )
 
-            st.subheader("Answer")
-            st.markdown(answer)
-
+        st.subheader("Answer")
+        st.markdown(answer)
+    
 
 # -----------------------------
 # Project Idea Generator page
